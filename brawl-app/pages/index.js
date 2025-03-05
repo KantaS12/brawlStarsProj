@@ -4,16 +4,20 @@ import axios from 'axios';
 export default function Home() {
   const [playerTag, setPlayerTag] = useState('');
   const [playerData, setPlayerData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchPlayerData = async () => {
-    if (!playerTag || !playerTag.startsWith('#')) {
-      console.error('Invalid player tag. Please enter a valid tag starting with #.');
+    if (!playerTag || (!playerTag.startsWith('#') && !playerTag.startsWith('23'))) {
+      console.error('Invalid player tag. Please enter a valid tag starting with # or 23.');
       return;
     }
-  
+
+    setLoading(true);
+    const normalizedTag = playerTag.replace('23', '#');
+
     try {
       const response = await axios.post('http://127.0.0.1:8000/player', {
-        tag: playerTag,
+        tag: normalizedTag,
       });
       setPlayerData(response.data);
     } catch (error) {
@@ -26,6 +30,8 @@ export default function Home() {
       } else {
         console.error('Error Message:', error.message);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -34,13 +40,17 @@ export default function Home() {
       <h1>Brawl Stars Player Lookup</h1>
       <input
         type="text"
-        placeholder="Enter Player Tag (e.g., #123ABC)"
+        placeholder="Enter Player Tag (e.g., #123ABC or 23123ABC)"
         value={playerTag}
         onChange={(e) => setPlayerTag(e.target.value)}
         style={{ padding: '10px', width: '300px' }}
       />
-      <button onClick={fetchPlayerData} style={{ marginLeft: '10px', padding: '10px 20px' }}>
-        Search
+      <button
+        onClick={fetchPlayerData}
+        disabled={loading}
+        style={{ marginLeft: '10px', padding: '10px 20px' }}
+      >
+        {loading ? 'Searching...' : 'Search'}
       </button>
 
       {playerData && (
