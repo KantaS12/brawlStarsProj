@@ -6,6 +6,11 @@ export default function Home() {
   const [playerData, setPlayerData] = useState(null);
 
   const fetchPlayerData = async () => {
+    if (!playerTag || !playerTag.startsWith('#')) {
+      console.error('Invalid player tag. Please enter a valid tag starting with #.');
+      return;
+    }
+  
     try {
       const response = await axios.post('http://127.0.0.1:8000/player', {
         tag: playerTag,
@@ -13,6 +18,14 @@ export default function Home() {
       setPlayerData(response.data);
     } catch (error) {
       console.error('Error fetching player data:', error);
+      if (error.response) {
+        console.error('Response Data:', error.response.data);
+        console.error('Response Status:', error.response.status);
+      } else if (error.request) {
+        console.error('No Response Received:', error.request);
+      } else {
+        console.error('Error Message:', error.message);
+      }
     }
   };
 
